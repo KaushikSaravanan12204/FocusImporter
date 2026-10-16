@@ -9,6 +9,7 @@ import type {
 import { buildStudentInfoCsv } from "@/lib/csv/student-info";
 import { buildEnrollmentCsv } from "@/lib/csv/enrollment";
 import { buildPrimaryAddressCsv } from "@/lib/csv/primary-address";
+import { findIssues } from "@/lib/csv/issues";
 
 // ── In-browser job registry ───────────────────────────────────────────────────
 // Keyed by jobId → filename → Blob. Cleared on each new conversion so memory
@@ -87,6 +88,9 @@ export class LocalApiClient implements ApiClient {
       throw new Error("The uploaded workbook appears to be empty.");
     }
 
+    // Validation runs on its own, separate from the CSV builders
+    const issues = findIssues(headers, rawRows);
+
     onStage?.(1); // → Split stage active
 
     const studentInfo   = buildStudentInfoCsv(headers, rawRows, details);
@@ -110,10 +114,10 @@ export class LocalApiClient implements ApiClient {
 
     return {
       jobId,
-      status: studentInfo.issues.length > 0 ? "completed_with_issues" : "completed",
+      status: issues.length > 0 ? "completed_with_issues" : "completed",
       sourceFileName: file.name,
       createdAt: new Date().toISOString(),
-      issues: studentInfo.issues,
+      issues,
       files: outputFiles,
     };
   }
