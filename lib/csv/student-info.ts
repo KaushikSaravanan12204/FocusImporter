@@ -1,12 +1,11 @@
-import type { ConversionDetails, ValidationIssue } from "@/lib/types";
+import type { ConversionDetails } from "@/lib/types";
+// Previous issues imports (moved to lib/csv/issues.ts): ValidationIssue, colLetter, norm
 import {
   asGrade,
   asString,
   buildHeaderIndex,
-  colLetter,
   csvEscape,
   getCell,
-  norm,
   skipFormatHintRow,
   type HeaderIndex,
 } from "@/lib/csv/utils";
@@ -58,7 +57,8 @@ export const STUDENT_INFO_HEADERS: ReadonlyArray<keyof StudentInfoRow> = [
 export interface StudentInfoResult {
   csvBlob: Blob;
   rows: StudentInfoRow[];
-  issues: ValidationIssue[];
+  // Previous issues field (now produced by findIssues in lib/csv/issues.ts)
+  // issues: ValidationIssue[];
 }
 
 // ── Value transformers ────────────────────────────────────────────────────────
@@ -163,61 +163,64 @@ export function buildStudentInfoCsv(
   details: ConversionDetails,
 ): StudentInfoResult {
   const idx = buildHeaderIndex(headers);
-  const issues: ValidationIssue[] = [];
+  // Previous issues: validation now lives in findIssues (lib/csv/issues.ts)
+  // const issues: ValidationIssue[] = [];
 
-  const { dataRows, hintOffset } = skipFormatHintRow(rawRows);
+  const { dataRows } = skipFormatHintRow(rawRows);
 
-  const emailColIdx = idx[norm("Student Email")] ?? -1;
-  const schoolIdColIdx =
-    idx[norm("External School ID")] ?? idx[norm("Student School ID")] ?? -1;
+  // Previous issues: column lookups used only by the validation below
+  // const emailColIdx = idx[norm("Student Email")] ?? -1;
+  // const schoolIdColIdx =
+  //   idx[norm("External School ID")] ?? idx[norm("Student School ID")] ?? -1;
 
   const mappedRows: StudentInfoRow[] = [];
 
   for (let i = 0; i < dataRows.length; i++) {
     const raw = dataRows[i];
-    const sourceRowNum = i + 2 + hintOffset;
+    // Previous issues: const sourceRowNum = i + 2 + hintOffset;
 
     if (raw.every((v) => v === null || v === undefined || String(v).trim() === "")) {
       continue;
     }
 
-    const schoolIdVal = schoolIdColIdx >= 0 ? raw[schoolIdColIdx] : null;
-    if (!schoolIdVal || String(schoolIdVal).trim() === "") {
-      issues.push({
-        id: crypto.randomUUID(),
-        column: "External School ID",
-        row: sourceRowNum,
-        cell: `${colLetter(Math.max(schoolIdColIdx, 0))}${sourceRowNum}`,
-        type: "empty_cell",
-        message: `External School ID is missing at row ${sourceRowNum}.`,
-      });
-    }
-
-    if (emailColIdx >= 0) {
-      const emailStr = emailColIdx < raw.length && raw[emailColIdx] !== null
-        ? String(raw[emailColIdx]).trim()
-        : "";
-
-      if (emailStr === "") {
-        issues.push({
-          id: crypto.randomUUID(),
-          column: "Student Email",
-          row: sourceRowNum,
-          cell: `${colLetter(emailColIdx)}${sourceRowNum}`,
-          type: "empty_cell",
-          message: `Student Email is missing at row ${sourceRowNum}.`,
-        });
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
-        issues.push({
-          id: crypto.randomUUID(),
-          column: "Student Email",
-          row: sourceRowNum,
-          cell: `${colLetter(emailColIdx)}${sourceRowNum}`,
-          type: "invalid_value",
-          message: `'${emailStr}' is not a valid email address at row ${sourceRowNum}.`,
-        });
-      }
-    }
+    // ── Previous issues (moved to findIssues in lib/csv/issues.ts) ──────────
+    // const schoolIdVal = schoolIdColIdx >= 0 ? raw[schoolIdColIdx] : null;
+    // if (!schoolIdVal || String(schoolIdVal).trim() === "") {
+    //   issues.push({
+    //     id: crypto.randomUUID(),
+    //     column: "External School ID",
+    //     row: sourceRowNum,
+    //     cell: `${colLetter(Math.max(schoolIdColIdx, 0))}${sourceRowNum}`,
+    //     type: "empty_cell",
+    //     message: `External School ID is missing at row ${sourceRowNum}.`,
+    //   });
+    // }
+    //
+    // if (emailColIdx >= 0) {
+    //   const emailStr = emailColIdx < raw.length && raw[emailColIdx] !== null
+    //     ? String(raw[emailColIdx]).trim()
+    //     : "";
+    //
+    //   if (emailStr === "") {
+    //     issues.push({
+    //       id: crypto.randomUUID(),
+    //       column: "Student Email",
+    //       row: sourceRowNum,
+    //       cell: `${colLetter(emailColIdx)}${sourceRowNum}`,
+    //       type: "empty_cell",
+    //       message: `Student Email is missing at row ${sourceRowNum}.`,
+    //     });
+    //   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
+    //     issues.push({
+    //       id: crypto.randomUUID(),
+    //       column: "Student Email",
+    //       row: sourceRowNum,
+    //       cell: `${colLetter(emailColIdx)}${sourceRowNum}`,
+    //       type: "invalid_value",
+    //       message: `'${emailStr}' is not a valid email address at row ${sourceRowNum}.`,
+    //     });
+    //   }
+    // }
 
     mappedRows.push(mapRow(raw, idx, details));
   }
@@ -231,5 +234,5 @@ export function buildStudentInfoCsv(
     type: "text/csv;charset=utf-8",
   });
 
-  return { csvBlob, rows: mappedRows, issues };
+  return { csvBlob, rows: mappedRows };
 }
