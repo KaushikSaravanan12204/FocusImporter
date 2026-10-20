@@ -64,9 +64,17 @@ export interface StudentInfoResult {
 
 function convertYN(val: unknown): string {
   const s = String(val ?? "").trim().toUpperCase();
-  if (s === "Y" || s === "1") return "1";
-  if (s === "N" || s === "0") return "0";
+  if (s === "Y" || s === "YES" || s === "1") return "1";
+  if (s === "N" || s === "NO" || s === "0") return "0";
   if (s === "") return "";
+  return s;
+}
+
+// Citizenship is a Y/N field (unlike the race flags, which are 1/0).
+function convertCitizen(val: unknown): string {
+  const s = String(val ?? "").trim().toUpperCase();
+  if (s === "Y" || s === "YES" || s === "1") return "Y";
+  if (s === "N" || s === "NO" || s === "0") return "N";
   return s;
 }
 
@@ -144,7 +152,7 @@ function mapRow(
       getCell(raw, idx, "RACE: NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER", "Native Hawaiian/Pacific Islander", "Native Hawaiian or Other Pacific Islander"),
     ),
     "WHITE": convertYN(getCell(raw, idx, "RACE: WHITE", "White")),
-    "US Citizen": asString(getCell(raw, idx, "US Citizen")),
+    "US Citizen": convertCitizen(getCell(raw, idx, "US Citizen")),
     "Region": details.regionCode,
     "TTU Local Student ID": studentSchoolId,
     "Profile": details.profile,
