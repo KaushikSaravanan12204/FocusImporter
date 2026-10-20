@@ -10,7 +10,18 @@ export function norm(h: unknown): string {
 
 export function buildHeaderIndex(headers: string[]): HeaderIndex {
   const idx: HeaderIndex = {};
-  headers.forEach((h, i) => { idx[norm(h)] = i; });
+  // Previous issues: duplicate headers (student vs parent "First/Middle/Last Name")
+  // overwrote each other, so the student columns read the parent's values and
+  // "First Name.1" etc. never existed.
+  // headers.forEach((h, i) => { idx[norm(h)] = i; });
+  // First occurrence keeps the plain name; later duplicates become "name.1", "name.2", ...
+  const seen: Record<string, number> = {};
+  headers.forEach((h, i) => {
+    const key = norm(h);
+    const count = seen[key] ?? 0;
+    idx[count === 0 ? key : `${key}.${count}`] = i;
+    seen[key] = count + 1;
+  });
   return idx;
 }
 
