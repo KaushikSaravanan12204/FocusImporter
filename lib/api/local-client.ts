@@ -113,7 +113,7 @@ export class LocalApiClient implements ApiClient {
       makeOutputFile(jobId, "Student Information.csv", studentInfo.csvBlob, studentInfo.rows.length, 18),
       makeOutputFile(jobId, "Enrollment.csv",          enrollment.csvBlob,  enrollment.rows.length,  7),
       // makeOutputFile(jobId, "Primary Address.csv",     primaryAddr.csvBlob, primaryAddr.rows.length, 7),
-      makeOutputFile(jobId, "Student Contact Information.csv", studentContact.csvBlob, studentContact.rows.length, 11),
+      makeOutputFile(jobId, "Student Contact Information.csv", studentContact.csvBlob, studentContact.rows.length, 12),
     ];
 
     return {
