@@ -1,7 +1,6 @@
 import type { ConversionDetails } from "@/lib/types";
 // Previous issues imports (moved to lib/csv/issues.ts): ValidationIssue, colLetter, norm
 import {
-  asGrade,
   asString,
   buildHeaderIndex,
   csvEscape,
@@ -13,14 +12,14 @@ import {
 // ── Output schema ─────────────────────────────────────────────────────────────
 
 export interface StudentInfoRow {
-  "External School ID": string;
+  "Student School ID": string;
+  "Unique State ID": string;
   "Last Name": string;
   "First Name": string;
   "Middle Name": string;
   "Birth Date": string;
   "Gender": string;
   "Student Email": string;
-  "Grade": string;
   "HISP/LAT": string;
   "AMERICAN INDIAN OR ALASKA NATIVE": string;
   "ASIAN": string;
@@ -34,14 +33,14 @@ export interface StudentInfoRow {
 }
 
 export const STUDENT_INFO_HEADERS: ReadonlyArray<keyof StudentInfoRow> = [
-  "External School ID",
+  "Student School ID",
+  "Unique State ID",
   "Last Name",
   "First Name",
   "Middle Name",
   "Birth Date",
   "Gender",
   "Student Email",
-  "Grade",
   "HISP/LAT",
   "AMERICAN INDIAN OR ALASKA NATIVE",
   "ASIAN",
@@ -119,32 +118,35 @@ function mapRow(
   idx: HeaderIndex,
   details: ConversionDetails,
 ): StudentInfoRow {
-  const externalSchoolId = asString(
+  // Input has either "External School ID" or "Student School ID"; both are the local student ID.
+  const studentSchoolId = asString(
     getCell(raw, idx, "External School ID", "Student School ID"),
   );
 
   return {
-    "External School ID": externalSchoolId,
-    "Last Name":  asString(raw[1]),
-    "First Name": asString(raw[2]),
-    "Middle Name": asString(raw[3]),
+    "Student School ID": studentSchoolId,
+    "Unique State ID": asString(getCell(raw, idx, "Unique State ID (TSDS ID)")),
+    "Last Name": asString(getCell(raw, idx, "Last Name")),
+    "First Name": asString(getCell(raw, idx, "First Name")),
+    "Middle Name": asString(getCell(raw, idx, "Middle Name")),
     "Birth Date": formatDate(getCell(raw, idx, "Birth Date")),
     "Gender": asString(getCell(raw, idx, "Gender")),
     "Student Email": asString(getCell(raw, idx, "Student Email")),
-    "Grade":         asGrade(raw[7]),
     "HISP/LAT": convertYN(getCell(raw, idx, "HISP/LATINO", "HISP/LAT")),
     "AMERICAN INDIAN OR ALASKA NATIVE": convertYN(
-      getCell(raw, idx, "American Indian or Alaskan Native", "American Indian or Alaska Native"),
+      getCell(raw, idx, "RACE: AMERICAN INDIAN OR ALASKA NATIVE", "American Indian or Alaskan Native", "American Indian or Alaska Native"),
     ),
-    "ASIAN": convertYN(getCell(raw, idx, "Asian")),
-    "BLACK OR AFRICAN AMERICAN": convertYN(getCell(raw, idx, "Black or African American")),
+    "ASIAN": convertYN(getCell(raw, idx, "RACE: ASIAN", "Asian")),
+    "BLACK OR AFRICAN AMERICAN": convertYN(
+      getCell(raw, idx, "RACE: BLACK OR AFRICAN AMERICAN", "Black or African American"),
+    ),
     "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER": convertYN(
-      getCell(raw, idx, "Native Hawaiian/Pacific Islander", "Native Hawaiian or Other Pacific Islander"),
+      getCell(raw, idx, "RACE: NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER", "Native Hawaiian/Pacific Islander", "Native Hawaiian or Other Pacific Islander"),
     ),
-    "WHITE": convertYN(getCell(raw, idx, "White")),
+    "WHITE": convertYN(getCell(raw, idx, "RACE: WHITE", "White")),
     "US Citizen": asString(getCell(raw, idx, "US Citizen")),
     "Region": details.regionCode,
-    "TTU Local Student ID": externalSchoolId,
+    "TTU Local Student ID": studentSchoolId,
     "Profile": details.profile,
   };
 }
