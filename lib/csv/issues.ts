@@ -21,7 +21,7 @@ export function findIssues(
 
   const emailColIdx = idx[norm("Student Email")] ?? -1;
   const schoolIdColIdx =
-    idx[norm("TTU Local Student ID")] ?? idx[norm("Student School ID")] ?? -1;
+    idx[norm("External School ID")] ?? idx[norm("Student School ID")] ?? -1;
 
   for (let i = 0; i < dataRows.length; i++) {
     const raw = dataRows[i];
@@ -36,11 +36,11 @@ export function findIssues(
     if (!schoolIdVal || String(schoolIdVal).trim() === "") {
       issues.push({
         id: crypto.randomUUID(),
-        column: "TTU Local Student ID ",
+        column: "External School ID",
         row: sourceRowNum,
         cell: `${colLetter(Math.max(schoolIdColIdx, 0))}${sourceRowNum}`,
         type: "empty_cell",
-        message: `TTU Local Student ID or Student School ID is missing at row ${sourceRowNum}.`,
+        message: `External School ID or Student School ID is missing at row ${sourceRowNum}.`,
       });
     }
 
