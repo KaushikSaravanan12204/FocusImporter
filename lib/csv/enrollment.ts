@@ -63,7 +63,9 @@ function mapRow(
     "School ID": details.schoolId,
     "Start Date": startDate,
     "End Date": "",
-    "Grade": asGrade(raw[7], true),
+    // Previous issues: column 8 by position, which is Student Email in the current template
+    // "Grade": asGrade(raw[7], true),
+    "Grade": asGrade(getCell(raw, idx, "Grade Level", "Grade"), true),
     "Enrollment Code": details.enrollmentCode,
   };
 }
