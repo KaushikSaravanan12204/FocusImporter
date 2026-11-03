@@ -3,7 +3,8 @@ import {
   buildHeaderIndex,
   csvEscape,
   getCell,
-  peopleImportKey,
+  // Previous issues: only used for the generated People Import Key (removed below)
+  // peopleImportKey,
   skipFormatHintRow,
   type HeaderIndex,
 } from "@/lib/csv/utils";
@@ -90,10 +91,14 @@ function mapRow(raw: unknown[], idx: HeaderIndex): StudentContactRow {
     "Student ID": asString(
       getCell(raw, idx, "External School ID", "Student School ID"),
     ),
-    // People Import Key = matching key hashed from TTU Local Student ID;,
-    "People Import Key": peopleImportKey(
-      asString(getCell(raw, idx, "External School ID", "Student School ID")),
-    ),
+    // Previous issues: generated our own key, but the People Import Key is the
+    // Focus ID, which Focus SIS creates after the Student Information import (Step 1).
+    // // People Import Key = matching key hashed from TTU Local Student ID;,
+    // "People Import Key": peopleImportKey(
+    //   asString(getCell(raw, idx, "External School ID", "Student School ID")),
+    // ),
+    // Focus ID is created by Focus SIS after the Step 1 import
+    "People Import Key": "",
   };
 }
 

@@ -3,7 +3,8 @@ import {
   csvEscape,
   getCell,
   asString,
-  peopleImportKey,
+  // Previous issues: only used for the generated Person ID (removed below)
+  // peopleImportKey,
   skipFormatHintRow,
   type HeaderIndex,
 } from "@/lib/csv/utils";
@@ -12,8 +13,9 @@ import { getParentKey } from "@/lib/csv/parent-user-info";
 
 // ── Output schema ─────────────────────────────────────────────────────────────
 
-// All string: CSV is text, Staff ID stays blank until Focus SIS creates the
-// Parent User ID in Step 4, and IDs keep any leading zeros.
+// All string: CSV is text, Staff ID and Person ID stay blank until Focus SIS
+// creates them (Parent User ID in Step 4, Focus ID in Step 1), and IDs keep
+// any leading zeros.
 export interface ParentLinkedUserRow {
   "Staff ID": string;
   "Student ID": string;
@@ -39,8 +41,11 @@ function mapRow(studentId: string): ParentLinkedUserRow {
     "Staff ID": "",
     // TTU Local Student ID = External School ID / Student School ID
     "Student ID": studentId,
-    // Same key as "People Import Key" in Student Contact (Step 3)
-    "Person ID": peopleImportKey(studentId),
+    // Previous issues: generated our own 16-digit key, but Person ID is the
+    // Focus ID, which Focus SIS creates after the Student Information import (Step 1).
+    // "Person ID": peopleImportKey(studentId),
+    // Focus ID is created by Focus SIS after the Step 1 import
+    "Person ID": "",
   };
 }
 
