@@ -19,7 +19,7 @@ type FlowStatus = "idle" | "confirming" | "converting" | "done";
 
 // Previous issues: 20s was too short to download all five files
 // const COUNTDOWN_SECONDS = 20;
-const COUNTDOWN_SECONDS = 60;
+const COUNTDOWN_SECONDS = 30;
 
 export function ConversionFlow() {
   const [status, setStatus] = useState<FlowStatus>("idle");
